@@ -1,45 +1,141 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity Web Player | ifarmer-snakeludo</title>
-  </head>
-  <body style="text-align: center; padding: 0; border: 0; margin: 0;">
-    <canvas id="unity-canvas" width=1080 height=2160 tabindex="-1" style="width: 1080px; height: 2160px; background: #231F20"></canvas>
-    <script src="Build/ifarmar-snakeludo.loader.js"></script>
-    <script>
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile device style: fill the whole browser client area with the game canvas:
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
 
-        var canvas = document.querySelector("#unity-canvas");
-        canvas.style.width = "100%";
-        canvas.style.height = "100%";
-        canvas.style.position = "fixed";
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport"
+    content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes">
+  <title>Unity Web Player | ifarmer-snakeludo</title>
+  <style>
+    body {
+      text-align: center;
+      padding: 0;
+      border: 0;
+      margin: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #231F20;
+      /* Custom Background Image */
+      background-image: url('TemplateData/background.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
 
-        document.body.style.textAlign = "left";
+    #game-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
 
+    #unity-canvas {
+      width: 100%;
+      height: 100%;
+      background: transparent !important;
+    }
+
+    /* Loading Screen Overlay */
+    #loading-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-color: rgba(0, 0, 0, 0.4);
+      /* Dark semi-transparent overlay */
+      z-index: 10;
+      transition: opacity 0.5s ease;
+    }
+
+    #loading-gif {
+      width: 150px;
+      /* Adjust size based on the specific gif */
+      height: auto;
+      margin-bottom: 20px;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div id="game-container">
+    <canvas id="unity-canvas" tabindex="-1"></canvas>
+
+    <div id="loading-screen">
+      <!-- Make sure to place your GIF as TemplateData/loading.gif -->
+      <img id="loading-gif" src="TemplateData/loading.gif" alt="Loading..." onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <script src="Build/ifarmar-snakeludo.loader.js"></script>
+  <script>
+    var canvas = document.querySelector("#unity-canvas");
+    var loadingScreen = document.querySelector("#loading-screen");
+
+    // Mobile device check logic matching original
+    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      canvas.style.width = "100%";
+      canvas.style.height = "100%";
+      document.body.style.textAlign = "left";
+    }
+
+    var buildUrl = "Build";
+    var config = {
+      arguments: [],
+      dataUrl: buildUrl + "/ifarmar-snakeludo.data.unityweb",
+      frameworkUrl: buildUrl + "/ifarmar-snakeludo.framework.js.unityweb",
+      codeUrl: buildUrl + "/ifarmar-snakeludo.wasm.unityweb",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "InceptionStudio",
+      productName: "ifarmer-snakeludo",
+      productVersion: "1.0",
+      // matchWebGLToCanvasSize: false, 
+      // devicePixelRatio: 1, 
+    };
+
+    createUnityInstance(canvas, config, (progress) => {
+      // Intentionally left blank, using only loading.gif indicator
+    }).then((unityInstance) => {
+      // Hide loading screen when game is fully instantiated
+      loadingScreen.style.opacity = "0";
+      setTimeout(() => {
+        loadingScreen.style.display = "none";
+      }, 500);
+    }).catch((message) => {
+      alert(message);
+    });
+  </script>
+  <script>
+    function preventBack() {
+      window.history.pushState(null, null, window.location.href);
+    }
+
+    window.onload = function () {
+      preventBack();
+    };
+
+    window.onpopstate = function () {
+      // Back button pressed
+      console.log("Back button pressed!");
+
+      // Option 1: Do nothing (just stay in app)
+      preventBack();
+
+      // Option 2: Call Unity function
+      if (typeof unityInstance !== "undefined") {
+        unityInstance.SendMessage("WebGLBridge", "OnBackPressed");
       }
+    };
+  </script>
+</body>
 
-      createUnityInstance(document.querySelector("#unity-canvas"), {
-        arguments: [],
-        dataUrl: "Build/ifarmar-snakeludo.data.unityweb",
-        frameworkUrl: "Build/ifarmar-snakeludo.framework.js.unityweb",
-        codeUrl: "Build/ifarmar-snakeludo.wasm.unityweb",
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "InceptionStudio",
-        productName: "ifarmer-snakeludo",
-        productVersion: "1.0",
-        // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
-        // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
-      }).then((unityInstance) => {
-      }).catch((message) => {
-        alert(message);
-      });
-    </script>
-  </body>
 </html>
