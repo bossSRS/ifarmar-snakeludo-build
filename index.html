@@ -109,13 +109,18 @@
       companyName: "InceptionStudio",
       productName: "ifarmer-snakeludo",
       productVersion: "1.0",
-      // matchWebGLToCanvasSize: false, 
-      // devicePixelRatio: 1, 
     };
+
+    // Global variable to store Unity instance
+    var unityInstance = null;
 
     createUnityInstance(canvas, config, (progress) => {
       // Intentionally left blank, using only loading.gif indicator
-    }).then((unityInstance) => {
+    }).then((instance) => {
+      // Store the Unity instance globally
+      unityInstance = instance;
+      console.log("[WebView] Unity instance loaded");
+
       // Hide loading screen when game is fully instantiated
       loadingScreen.style.opacity = "0";
       setTimeout(() => {
