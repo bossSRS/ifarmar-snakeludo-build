@@ -143,10 +143,10 @@
 
       // Option 2: Call Unity function
       if (typeof unityInstance !== "undefined") {
-        unityInstance.SendMessage("WebGLBridge", "OnBackPressed");
+        unityInstance.SendMessage("SnakeLudoGameManager", "OnBackPressed", "");  // ✅ CHANGE THIS LINE
       }
     };
-  </script>
+  </script> 
 </body>
 
 </html>
