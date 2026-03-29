@@ -92,7 +92,6 @@
     var canvas = document.querySelector("#unity-canvas");
     var loadingScreen = document.querySelector("#loading-screen");
 
-    // Mobile device check logic
     if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
       canvas.style.width = "100%";
       canvas.style.height = "100%";
@@ -112,11 +111,12 @@
     };
 
     createUnityInstance(canvas, config, (progress) => {
-      // Loading progress - using loading.gif instead
+      // Progress handling
     }).then((instance) => {
-      // Store Unity instance globally for back button handler
+      // CRITICAL: Store Unity instance globally
       unityInstance = instance;
-      console.log("[WebView] Unity instance loaded and ready");
+      console.log("[WebView] ✓✓✓ UNITY INSTANCE LOADED ✓✓✓");
+      console.log("[WebView] unityInstance =", unityInstance);
 
       // Hide loading screen
       loadingScreen.style.opacity = "0";
@@ -129,42 +129,47 @@
     });
   </script>
   <script>
-    // Global variable to store Unity instance
+    // Global Unity instance
     var unityInstance = null;
 
+    // Prevent back navigation
     function preventBack() {
       window.history.pushState(null, null, window.location.href);
     }
 
     window.onload = function () {
+      console.log("[WebView] Page loaded");
       preventBack();
-
-      // Listen for Unity instance loaded
-      console.log("[WebView] Page loaded, waiting for Unity...");
     };
 
-    // Override back button
+    // Handle back button press
     window.onpopstate = function (event) {
-      console.log("[WebView] Back button pressed!");
+      console.log("[WebView] ========== BACK BUTTON PRESSED ==========");
 
-      // Prevent browser back navigation
+      // Prevent browser from going back
       preventBack();
 
       // Check if Unity is ready
-      if (unityInstance !== null && typeof unityInstance !== "undefined") {
-        console.log("[WebView] Calling Unity OnBackPressed");
+      if (unityInstance) {
+        console.log("[WebView] Unity instance exists, calling OnBackPressed...");
 
         try {
-          // Call Unity's back button handler
           unityInstance.SendMessage("SnakeLudoGameManager", "OnBackPressed", "");
-          console.log("[WebView] Successfully called OnBackPressed");
-        } catch (error) {
-          console.error("[WebView] Error calling OnBackPressed:", error);
+          console.log("[WebView] ✓ SendMessage called successfully");
+        } catch (e) {
+          console.error("[WebView] ✗ Error calling SendMessage:", e);
         }
       } else {
-        console.warn("[WebView] Unity instance not ready yet, ignoring back button");
+        console.warn("[WebView] ✗ Unity instance is NULL, ignoring back button");
       }
+
+      console.log("[WebView] =======================================");
     };
+
+    // Also listen to browser back button directly (additional safety)
+    window.addEventListener('popstate', function(event) {
+      console.log("[WebView] popstate event fired");
+    });
   </script>
 </body>
 
