@@ -171,6 +171,36 @@
       console.log("[WebView] popstate event fired");
     });
   </script>
+  <script>
+    // Global handler that Unity can call
+    var AndroidBackButtonHandler = {
+      quitGame: function () {
+        console.log("[WebGL] quitGame called from Unity");
+
+        try {
+          // 1️⃣ If running inside Android WebView (native app)
+          if (typeof Android !== "undefined" && Android.quitGame) {
+            Android.quitGame(); // Calls Java/Kotlin interface
+            return;
+          }
+
+          // 2️⃣ If using postMessage bridge (modern approach)
+          if (window.parent) {
+            window.parent.postMessage({ type: "QUIT_GAME" }, "*");
+          }
+
+          // 3️⃣ Attempt to close window (will usually fail)
+          window.close();
+
+          // 4️⃣ Fallback UX
+          alert("Please close the game using your device back button.");
+        } catch (e) {
+          console.error("[WebGL] Quit failed:", e);
+          alert("Unable to close automatically. Please exit manually.");
+        }
+      }
+    };
+  </script>
 </body>
 
 </html>
